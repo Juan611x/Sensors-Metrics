@@ -46,6 +46,32 @@ services:
       - gateway
     networks:
       - network-1
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: saludiot
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - network-1
+  mqtt_subscriber:
+    build:
+      context: ./subscriber-mqtt
+    depends_on:
+      - mosquitto
+      - postgres
+    networks:
+      - network-1
+    restart: unless-stopped
 networks:
   network-1:
     driver: bridge
+volumes:
+  pgdata:
