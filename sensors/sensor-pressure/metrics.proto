@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package metrics;
+
+service MetricsService {
+  rpc EnviarMetrica (MetricaRequest) returns (MetricaResponse);
+}
+
+message MetricaRequest {
+  int32 sensor_id = 1;
+  int32 persona_id = 2;
+  string nombre = 3;
+  string unidad = 4;
+  double valor = 5;
+  string timestamp = 6;
+}
+
+message MetricaResponse {
+  string status = 1;
+}

@@ -1,0 +1,38 @@
+services:
+  gateway:
+    build:
+      context: ./GateWay
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+      - "3000:3000"
+    tty: true
+    networks:
+      - network-1
+  temperature_sensor:
+    build:
+      context: ./sensors/sensor-temperature
+      dockerfile: Dockerfile
+    depends_on:
+      - gateway
+    networks:
+      - network-1
+  pressure_sensor:
+    build:
+      context: ./sensors/sensor-pressure
+      dockerfile: Dockerfile
+    depends_on:
+      - gateway
+    networks:
+      - network-1
+  heartrate_sensor:
+    build:
+      context: ./sensors/sensor-heartrate
+      dockerfile: Dockerfile
+    depends_on:
+      - gateway
+    networks:
+      - network-1
+networks:
+  network-1:
+    driver: bridge
