@@ -1,4 +1,15 @@
 services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./Brocker/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./Brocker/data:/mosquitto/data
+      - ./Brocker/log:/mosquitto/log
+    networks:
+      - network-1
+    restart: unless-stopped
   gateway:
     build:
       context: ./GateWay
@@ -9,6 +20,8 @@ services:
     tty: true
     networks:
       - network-1
+    depends_on:
+      - mosquitto
   temperature_sensor:
     build:
       context: ./sensors/sensor-temperature

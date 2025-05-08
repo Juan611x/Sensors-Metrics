@@ -14,6 +14,14 @@ import threading
 import sys
 sys.stdout.reconfigure(line_buffering=True)
 
+
+# --- Publicar en el MQTT ---
+import paho.mqtt.client as mqtt
+
+mqtt_client = mqtt.Client()
+mqtt_client.connect("mosquitto", 1883)  # El nombre del contenedor en docker-compose
+
+
 # --- FLASK + WEBSOCKETS ---
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
@@ -23,12 +31,14 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 def recibir_metrica_http():
     data = request.json
     print(f"[HTTP] Métrica recibida: {json.dumps(data, indent=2)}", flush=True)
+    mqtt_client.publish("sensors/heartrate", json.dumps(data))
     return jsonify({"status": "ok"}), 200
 
 
 @socketio.on("message", namespace="/sensors/metrics")
 def recibir_metrica_ws(data):
     print(f"[WS] Métrica recibida: {json.dumps(data, indent=2)}", flush=True)
+    mqtt_client.publish("sensors/heartrate", json.dumps(data))
 
 
 
@@ -45,6 +55,7 @@ class MetricsService(metrics_pb2_grpc.MetricsServiceServicer):
             "timestamp": request.timestamp,
         }
         print(f"[gRPC] Métrica recibida:\n{json.dumps(data, indent=2)}", flush=True)
+        mqtt_client.publish("sensors/heartrate", json.dumps(data))
         return metrics_pb2.MetricaResponse(status="ok")
 
 
